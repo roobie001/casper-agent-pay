@@ -1,73 +1,80 @@
-# React + TypeScript + Vite
+# CasperAgent Pay
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+> Autonomous AI payment agent on Casper Network
 
-Currently, two official plugins are available:
+CasperAgent Pay lets users execute CSPR transactions using plain English instructions. Powered by Groq LLaMA for intent parsing and casper-js-sdk v5 for onchain execution.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Demo
 
-## React Compiler
+[Demo Video](your-youtube-link-here) | [Live App](your-vercel-link-here)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## What It Does
 
-## Expanding the ESLint configuration
+Users type natural language payment instructions and the AI agent autonomously:
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- Parses the intent (balance check, transfer, conditional transfer)
+- Evaluates any conditions against real wallet state
+- Executes the transaction on Casper Network
+- Logs every decision with tx hash and timestamp
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### Example Instructions
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+- `check my balance` → queries CSPR balance
+- `transfer 50 CSPR to 0202...` → executes direct transfer
+- `pay only if my balance is above 100 CSPR` → conditional payment
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Tech Stack
+
+| Layer      | Technology                               |
+| ---------- | ---------------------------------------- |
+| Frontend   | React + TypeScript + Vite + Tailwind CSS |
+| AI Agent   | Groq LLaMA 3.1 8B Instant                |
+| Blockchain | casper-js-sdk v5 + Casper Testnet        |
+| Backend    | Node.js + Express (proxy server)         |
+| Deploy     | Vercel                                   |
+
+## Architecture
+
+User Input → Groq LLaMA (parse intent) → AgentInstruction
+
+AgentInstruction → casper-js-sdk (execute) → TransactionRecord
+
+TransactionRecord → UI (logged with tx hash)
+
+## Getting Started
+
+```bash
+# Clone the repo
+git clone https://github.com/roobie001/casper-agent-pay
+cd casper-agent-pay
+
+# Install dependencies
+npm install
+
+# Set up environment
+cp .env.example .env
+# Add your GROQ_API_KEY to .env
+
+# Run dev server + proxy
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Environment Variables
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```env
+VITE_CASPER_RPC=https://rpc.testnet.casperlabs.io/rpc
+VITE_CASPER_NETWORK=casper-test
+GROQ_API_KEY=your_groq_api_key
 ```
+
+## Hackathon
+
+Built for the **Casper Agentic Buildathon 2026** .
+
+Tags: Agentic AI · DeFi · Real-World Assets · Casper Network · x402
+
+## Builder
+
+**Cajetan Obiajulu** — Final year CS student at UNN, building at the intersection of AI and Web3.
+
+GitHub: [@roobie001](https://github.com/roobie001)
