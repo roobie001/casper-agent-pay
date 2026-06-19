@@ -1,10 +1,27 @@
+// import {
+//   Deploy,
+//   HttpHandler,
+//   makeCsprTransferDeploy,
+//   PublicKey,
+//   PurseIdentifier,
+//   RpcClient,
+// } from "casper-js-sdk";
+
+"casper-js-sdk";
+
 import {
   HttpHandler,
   RpcClient,
   PurseIdentifier,
+  makeCsprTransferDeploy,
+  Deploy,
+  DeployHeader,
+  ExecutableDeployItem,
+  TransferDeployItem,
   PublicKey,
-  NativeTransferBuilder,
 } from "casper-js-sdk";
+
+import { getClickInstance } from "./csprclick";
 
 const RPC_URL = "http://localhost:3001/rpc";
 
@@ -12,24 +29,19 @@ export async function getBalance(publicKeyHex: string): Promise<string> {
   if (!publicKeyHex || publicKeyHex.length < 10) {
     throw new Error("Invalid public key");
   }
-  try {
-    const rpcHandler = new HttpHandler(RPC_URL);
-    const rpcClient = new RpcClient(rpcHandler);
-    const pubKey = PublicKey.fromHex(publicKeyHex);
-    const balance = await rpcClient.queryLatestBalance(
-      PurseIdentifier.fromPublicKey(pubKey),
-    );
-    return balance.toString();
-  } catch {
-    // Fallback to mock if RPC unreachable
-    console.warn("RPC unreachable, using mock balance");
-    await new Promise((resolve) => setTimeout(resolve, 800));
-    return "2500.5";
-  }
+  const rpcHandler = new HttpHandler(RPC_URL);
+  const rpcClient = new RpcClient(rpcHandler);
+  const pubKey = PublicKey.fromHex(publicKeyHex);
+  const balance = await rpcClient.queryLatestBalance(
+    PurseIdentifier.fromPublicKey(pubKey),
+  );
+  const motes = balance.balance;
+  const cspr = Number(motes) / 1_000_000_000;
+  return `${cspr.toLocaleString()} CSPR`;
 }
 
 export async function sendTransfer({
-  from: _from,
+  from,
   to,
   amount,
 }: {
@@ -38,17 +50,40 @@ export async function sendTransfer({
   amount: number;
   privateKeyPem?: string;
 }): Promise<string> {
-  try {
-    // Real transfer would go here — requires private key signing
-    // Mocked until Casper Wallet extension signing is integrated
-    await new Promise((resolve) => setTimeout(resolve, 1200));
-    const mockHash = Array.from({ length: 64 }, () =>
-      Math.floor(Math.random() * 16).toString(16),
-    ).join("");
-    return mockHash;
-  } catch {
-    throw new Error("Transfer failed");
+  const senderKey = PublicKey.fromHex(from);
+  const recipientKey = PublicKey.fromHex(to);
+
+  const transferAmountMotes = String(Math.floor(amount * 1_000_000_000));
+
+  const session = new ExecutableDeployItem();
+  session.transfer = TransferDeployItem.newTransfer(
+    transferAmountMotes,
+    recipientKey,
+    undefined,
+    Date.now(),
+  );
+
+  const deployHeader = DeployHeader.default();
+  deployHeader.account = senderKey;
+  deployHeader.chainName = "casper-test";
+
+  const payment = ExecutableDeployItem.standardPayment("100000000");
+
+  const deploy = Deploy.makeDeploy(deployHeader, payment, session);
+
+  const deployJson = Deploy.toJSON(deploy);
+  const click = getClickInstance();
+
+  const result = await click.send(deployJson, from, true);
+
+  if (result?.cancelled) {
+    throw new Error("Transaction cancelled by user");
   }
+  if (result?.error) {
+    throw new Error(result.error);
+  }
+
+  return result?.deployHash || result?.transactionHash || "unknown";
 }
 
 export default { getBalance, sendTransfer };

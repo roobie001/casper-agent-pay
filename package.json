@@ -11,13 +11,15 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@make-software/csprclick-core-client": "^1.11.0",
+    "@make-software/csprclick-core-types": "^2.1.0",
     "axios": "^1.4.0",
-    "express": "^4.18.2",
-    "cors": "^2.8.5",
-    "concurrently": "^8.0.1",
-    "dotenv": "^16.0.3",
-    "groq-sdk": "^0.3.0",
     "casper-js-sdk": "latest",
+    "concurrently": "^8.0.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "groq-sdk": "^0.3.0",
     "react": "^19.2.6",
     "react-dom": "^19.2.6"
   },

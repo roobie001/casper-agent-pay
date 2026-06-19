@@ -7,7 +7,8 @@ const app = express();
 app.use(cors());
 app.use(express.json({ limit: "5mb" }));
 
-const REMOTE_RPC = "https://casper-testnet.public.blastapi.io/rpc";
+// const REMOTE_RPC = "https://casper-testnet.public.blastapi.io/rpc";
+const REMOTE_RPC = "https://node.testnet.casper.network/rpc";
 
 app.post("/rpc", async (req, res) => {
   try {

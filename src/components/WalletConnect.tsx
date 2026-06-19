@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { getClickInstance } from "../lib/csprclick";
 
 type Props = {
   publicKey: string;
@@ -8,17 +9,38 @@ type Props = {
 export const WalletConnect: React.FC<Props> = ({ publicKey, setPublicKey }) => {
   const connected = Boolean(publicKey);
 
-  async function handleConnect() {
-    const provider = (window as any).casperWalletProvider;
-    if (!provider) {
-      alert("Casper Wallet provider not found. Please install the extension.");
-      return;
-    }
+  // Initialize and check for existing session on mount
+  useEffect(() => {
+    const click = getClickInstance();
 
+    const updateAccount = () => {
+      const account = click.getActiveAccount();
+      if (account?.public_key) {
+        setPublicKey(account.public_key);
+      }
+    };
+
+    // Check immediately if already connected
+    updateAccount();
+
+    // Listen for CSPR.click events
+    click.on("csprclick:signed_in", updateAccount);
+    click.on("csprclick:switched_account", updateAccount);
+    click.on("csprclick:signed_out", () => setPublicKey(""));
+
+    return () => {
+      click.off("csprclick:signed_in", updateAccount);
+      click.off("csprclick:switched_account", updateAccount);
+      click.off("csprclick:signed_out", () => setPublicKey(""));
+    };
+  }, [setPublicKey]);
+
+  async function handleConnect() {
     try {
-      await provider.requestConnection();
-      const key: string = await provider.getActivePublicKey();
-      setPublicKey(key);
+      const click = getClickInstance();
+      // Trigger the connection UI
+      await click.connect("casper-wallet");
+      // The event listeners added in useEffect will handle setting the public key
     } catch (err) {
       console.error("Failed to connect Casper Wallet", err);
       alert("Failed to connect Casper Wallet: " + String(err));
@@ -41,15 +63,6 @@ export const WalletConnect: React.FC<Props> = ({ publicKey, setPublicKey }) => {
       </div>
 
       <div className="space-y-3">
-        <label className="block text-sm font-medium text-gray-400">
-          Public Key
-        </label>
-        <input
-          value={publicKey}
-          onChange={(e) => setPublicKey(e.target.value)}
-          placeholder="Enter your Casper public key hex"
-          className="w-full rounded-lg border border-gray-700 bg-gray-950 px-4 py-3 text-sm font-mono text-white shadow-sm outline-none focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/20"
-        />
         <button
           onClick={handleConnect}
           className="w-full rounded-lg bg-green-600/20 border border-green-600/30 hover:bg-green-600/30 px-4 py-2 text-sm font-medium text-green-400 transition"

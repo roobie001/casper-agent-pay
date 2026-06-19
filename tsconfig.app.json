@@ -6,6 +6,11 @@
     "module": "esnext",
     "types": ["vite/client"],
     "skipLibCheck": true,
+    "paths": {
+      "@make-software/csprclick-core-client": [
+        "./src/lib/csprclick-core-client-runtime.ts"
+      ]
+    },
 
     /* Bundler mode */
     "moduleResolution": "bundler",
