@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { getClickInstance } from "../lib/csprclick";
 
 type Props = {
@@ -7,40 +7,48 @@ type Props = {
 };
 
 export const WalletConnect: React.FC<Props> = ({ publicKey, setPublicKey }) => {
+  const [isSdkReady, setIsSdkReady] = useState(false);
   const connected = Boolean(publicKey);
 
-  // Initialize and check for existing session on mount
+  // 1. SDK Loading Guard
   useEffect(() => {
+    const interval = setInterval(() => {
+      if ((window as any).csprclick) {
+        setIsSdkReady(true);
+        clearInterval(interval);
+      }
+    }, 500);
+    return () => clearInterval(interval);
+  }, []);
+
+  // 2. Event Listeners for Session Management
+  useEffect(() => {
+    if (!isSdkReady) return;
+
     const click = getClickInstance();
 
     const updateAccount = () => {
       const account = click.getActiveAccount();
-      if (account?.public_key) {
-        setPublicKey(account.public_key);
-      }
+      setPublicKey(account?.public_key || "");
     };
 
-    // Check immediately if already connected
     updateAccount();
 
-    // Listen for CSPR.click events
     click.on("csprclick:signed_in", updateAccount);
     click.on("csprclick:switched_account", updateAccount);
-    click.on("csprclick:signed_out", () => setPublicKey(""));
+    click.on("csprclick:signed_out", updateAccount);
 
     return () => {
       click.off("csprclick:signed_in", updateAccount);
       click.off("csprclick:switched_account", updateAccount);
-      click.off("csprclick:signed_out", () => setPublicKey(""));
+      click.off("csprclick:signed_out", updateAccount);
     };
-  }, [setPublicKey]);
+  }, [isSdkReady, setPublicKey]);
 
   async function handleConnect() {
     try {
       const click = getClickInstance();
-      // Trigger the connection UI
       await click.connect("casper-wallet");
-      // The event listeners added in useEffect will handle setting the public key
     } catch (err) {
       console.error("Failed to connect Casper Wallet", err);
       alert("Failed to connect Casper Wallet: " + String(err));
@@ -53,6 +61,7 @@ export const WalletConnect: React.FC<Props> = ({ publicKey, setPublicKey }) => {
     return `${key.slice(0, 6)}...${key.slice(-6)}`;
   }
 
+  // 3. Render
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-2 mb-4">
@@ -63,12 +72,16 @@ export const WalletConnect: React.FC<Props> = ({ publicKey, setPublicKey }) => {
       </div>
 
       <div className="space-y-3">
-        <button
-          onClick={handleConnect}
-          className="w-full rounded-lg bg-green-600/20 border border-green-600/30 hover:bg-green-600/30 px-4 py-2 text-sm font-medium text-green-400 transition"
-        >
-          {connected ? "✓ Connected" : "Connect Casper Wallet"}
-        </button>
+        {!isSdkReady ? (
+          <div className="text-gray-500 text-sm">Loading Wallet SDK...</div>
+        ) : (
+          <button
+            onClick={handleConnect}
+            className="w-full rounded-lg bg-green-600/20 border border-green-600/30 hover:bg-green-600/30 px-4 py-2 text-sm font-medium text-green-400 transition"
+          >
+            {connected ? "✓ Connected" : "Connect Casper Wallet"}
+          </button>
+        )}
       </div>
 
       {connected && (
