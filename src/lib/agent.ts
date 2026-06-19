@@ -22,11 +22,13 @@ function parseInstructionMock(input: string): AgentInstruction {
     const amount = amountMatch ? parseFloat(amountMatch[1]) : 0;
     const keyMatch = input.match(/([0-9a-f]{64})/i);
     const recipient = keyMatch ? keyMatch[1] : "";
+    // Extract condition if present
+    const conditionMatch = input.match(/balance\s*(>=|<=|==|!=|>|<)\s*(\d+)/i);
     return {
       action: "conditional_transfer",
       amount,
       recipient,
-      condition: "balance > 100",
+      condition: conditionMatch ? conditionMatch[0] : "balance > 100",
       rawInput: input,
     };
   }
@@ -69,7 +71,7 @@ Return only valid JSON. No explanation. No markdown.`,
     try {
       return JSON.parse(text) as AgentInstruction;
     } catch {
-      return { action: "check_balance", rawInput: input };
+      return parseInstructionMock(input);
     }
   } catch (err) {
     console.warn("AI endpoint unreachable, using dev mode parser", err);
@@ -114,19 +116,25 @@ export async function executeInstruction(
   const timestamp = new Date().toISOString();
   const rawInstruction = instruction.rawInput;
 
+  // Helper to parse balance string (e.g., "5,000 CSPR") to number
+  const getNumericBalance = async (pubKey: string): Promise<number> => {
+    const balanceStr = await getBalance(pubKey);
+    return parseFloat(balanceStr.replace(/[^0-9.]/g, ""));
+  };
+
   if (instruction.action === "check_balance") {
-    const balance = await getBalance(publicKey);
+    const balanceStr = await getBalance(publicKey);
     return {
       id,
       timestamp,
       instruction: rawInstruction,
       status: "executed",
-      decision: String(balance),
+      decision: balanceStr,
     };
   }
 
   if (instruction.action === "transfer") {
-    const tx = await sendTransfer({
+    const txHash = await sendTransfer({
       from: publicKey,
       to: instruction.recipient ?? "",
       amount: instruction.amount ?? 0,
@@ -137,13 +145,12 @@ export async function executeInstruction(
       timestamp,
       instruction: rawInstruction,
       status: "executed",
-      txHash: String((tx as any).hash ?? (tx as any).deployHash ?? ""),
+      txHash: txHash,
     };
   }
 
   if (instruction.action === "conditional_transfer") {
-    const balanceRaw = await getBalance(publicKey);
-    const balance = Number(balanceRaw);
+    const balance = await getNumericBalance(publicKey);
 
     if (!instruction.condition) {
       return {
@@ -151,7 +158,7 @@ export async function executeInstruction(
         timestamp,
         instruction: rawInstruction,
         status: "rejected",
-        decision: "No condition provided for conditional_transfer.",
+        decision: "No condition provided.",
       };
     }
 
@@ -162,11 +169,11 @@ export async function executeInstruction(
         timestamp,
         instruction: rawInstruction,
         status: "rejected",
-        decision: `Condition not met: ${instruction.condition} with balance ${balance}`,
+        decision: `Condition not met: '${instruction.condition}' with balance ${balance} CSPR`,
       };
     }
 
-    const tx = await sendTransfer({
+    const txHash = await sendTransfer({
       from: publicKey,
       to: instruction.recipient ?? "",
       amount: instruction.amount ?? 0,
@@ -177,7 +184,7 @@ export async function executeInstruction(
       timestamp,
       instruction: rawInstruction,
       status: "executed",
-      txHash: String((tx as any).hash ?? (tx as any).deployHash ?? ""),
+      txHash: txHash,
     };
   }
 
