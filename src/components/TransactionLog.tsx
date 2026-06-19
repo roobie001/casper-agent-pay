@@ -95,13 +95,16 @@ export const TransactionLog: React.FC<Props> = ({ transactions }) => {
 
               {record.txHash && (
                 <div className="mt-3">
+                  <p className="text-xs text-gray-500 mb-1">
+                    Transaction Hash:
+                  </p>
                   <a
                     href={`https://testnet.cspr.live/deploy/${record.txHash}`}
                     target="_blank"
-                    rel="noreferrer"
-                    className="text-xs text-orange-400 hover:text-orange-300 font-mono hover:underline transition"
+                    rel="noopener noreferrer"
+                    className="text-xs text-orange-400 hover:text-orange-300 font-mono hover:underline transition break-all"
                   >
-                    Deploy: {truncateTxHash(record.txHash)}
+                    {record.txHash}
                   </a>
                 </div>
               )}
