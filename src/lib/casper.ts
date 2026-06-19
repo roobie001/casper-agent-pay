@@ -13,7 +13,6 @@ import {
   HttpHandler,
   RpcClient,
   PurseIdentifier,
-  makeCsprTransferDeploy,
   Deploy,
   DeployHeader,
   ExecutableDeployItem,
