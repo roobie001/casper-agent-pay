@@ -27,10 +27,10 @@ function formatTimestamp(isoString: string): string {
   return date.toLocaleDateString();
 }
 
-function truncateTxHash(hash: string): string {
-  if (!hash || hash.length <= 16) return hash;
-  return `${hash.slice(0, 16)}...`;
-}
+// function truncateTxHash(hash: string): string {
+//   if (!hash || hash.length <= 16) return hash;
+//   return `${hash.slice(0, 16)}...`;
+// }
 
 export const TransactionLog: React.FC<Props> = ({ transactions }) => {
   return (
