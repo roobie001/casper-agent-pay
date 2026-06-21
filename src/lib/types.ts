@@ -17,4 +17,5 @@ export type TransactionRecord = {
   hash?: string;
   txHash?: string;
   decision?: string;
+  accountKey?: string;
 };

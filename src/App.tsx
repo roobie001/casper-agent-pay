@@ -20,12 +20,17 @@ function App() {
     localStorage.setItem("casper_transactions", JSON.stringify(transactions));
   }, [transactions]);
 
+  // Inside handleAgentSubmit in App.tsx
   async function handleAgentSubmit(input: string) {
     setIsProcessing(true);
     try {
       const instruction = await parseInstruction(input);
       const result = await executeInstruction(instruction, publicKey);
-      setTransactions((prev) => [result, ...prev]);
+      // Add accountKey here
+      setTransactions((prev) => [
+        { ...result, accountKey: publicKey },
+        ...prev,
+      ]);
     } catch (error) {
       const rejectedRecord: TransactionRecord = {
         id: Date.now().toString(),
@@ -33,6 +38,7 @@ function App() {
         instruction: input,
         status: "rejected",
         decision: error instanceof Error ? error.message : String(error),
+        accountKey: publicKey, // Add accountKey here
       };
       setTransactions((prev) => [rejectedRecord, ...prev]);
     } finally {
@@ -59,10 +65,7 @@ function App() {
           {!publicKey && (
             <div className="rounded-xl bg-orange-500/10 border border-orange-500/30 text-orange-300 p-4 font-medium text-sm flex items-start gap-2">
               <span className="text-lg">🔑</span>
-              <span>
-                Connect your wallet to get started — paste your Casper testnet
-                public key below.
-              </span>
+              <span>Connect your wallet to get started</span>
             </div>
           )}
         </div>
@@ -85,7 +88,10 @@ function App() {
               />
             </div>
             <div className="rounded-xl border border-gray-800 bg-gray-900/50 p-6 backdrop-blur-sm">
-              <TransactionLog transactions={transactions} />
+              <TransactionLog
+                transactions={transactions}
+                currentAccount={publicKey}
+              />
             </div>
           </div>
         </div>

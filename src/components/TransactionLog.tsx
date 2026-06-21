@@ -3,6 +3,7 @@ import type { TransactionRecord } from "../lib/types";
 
 type Props = {
   transactions: TransactionRecord[];
+  currentAccount: string;
 };
 
 function getActionIcon(instruction: string): string {
@@ -27,12 +28,19 @@ function formatTimestamp(isoString: string): string {
   return date.toLocaleDateString();
 }
 
-// function truncateTxHash(hash: string): string {
-//   if (!hash || hash.length <= 16) return hash;
-//   return `${hash.slice(0, 16)}...`;
-// }
+export const TransactionLog: React.FC<Props> = ({
+  transactions,
+  currentAccount,
+}) => {
+  // Filter transactions safely based on the currently connected account
+  const filteredTransactions = transactions.filter((tx) => {
+    // Fallback: If a record doesn't have an accountKey yet (old logs),
+    // let it show up so your history doesn't abruptly disappear.
+    if (!tx.accountKey) return true;
 
-export const TransactionLog: React.FC<Props> = ({ transactions }) => {
+    return tx.accountKey === currentAccount;
+  });
+
   return (
     <div className="space-y-4 text-white">
       <div>
@@ -44,8 +52,9 @@ export const TransactionLog: React.FC<Props> = ({ transactions }) => {
         </p>
       </div>
 
-      <div className="space-y-3">
-        {transactions.length === 0 ? (
+      {/* FIXED HEIGHT CONTAINER WITH SCROLLBAR */}
+      <div className="h-[400px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900 space-y-3">
+        {filteredTransactions.length === 0 ? (
           <div className="rounded-lg border border-dashed border-gray-700 bg-gray-900/30 p-8 text-center">
             <div className="text-3xl mb-2">📭</div>
             <p className="text-sm text-gray-400 font-medium">
@@ -56,7 +65,7 @@ export const TransactionLog: React.FC<Props> = ({ transactions }) => {
             </p>
           </div>
         ) : (
-          transactions.map((record) => (
+          filteredTransactions.map((record) => (
             <div
               key={record.id}
               className="rounded-lg border border-gray-800 bg-gray-900/40 p-4 hover:bg-gray-900/60 transition"
