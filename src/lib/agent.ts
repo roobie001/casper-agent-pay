@@ -1,6 +1,8 @@
 import type { AgentInstruction, TransactionRecord } from "./types";
 import { getBalance, sendTransfer } from "./casper";
 
+const AI_URL = import.meta.env.DEV ? "http://localhost:3001/ai" : "/api/ai";
+
 function parseInstructionMock(input: string): AgentInstruction {
   const lower = input.toLowerCase();
   // Simple dev-mode heuristics
@@ -39,7 +41,7 @@ export async function parseInstruction(
   input: string,
 ): Promise<AgentInstruction> {
   try {
-    const response = await fetch("http://localhost:3001/ai", {
+    const response = await fetch(AI_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

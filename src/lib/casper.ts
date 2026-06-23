@@ -1,14 +1,3 @@
-// import {
-//   Deploy,
-//   HttpHandler,
-//   makeCsprTransferDeploy,
-//   PublicKey,
-//   PurseIdentifier,
-//   RpcClient,
-// } from "casper-js-sdk";
-
-"casper-js-sdk";
-
 import {
   HttpHandler,
   RpcClient,
@@ -22,7 +11,8 @@ import {
 
 import { getClickInstance } from "./csprclick";
 
-const RPC_URL = "http://localhost:3001/rpc";
+// const RPC_URL = "http://localhost:3001/rpc";
+const RPC_URL = import.meta.env.DEV ? "http://localhost:3001/rpc" : "/api/rpc";
 
 export async function getBalance(publicKeyHex: string): Promise<string> {
   if (!publicKeyHex || publicKeyHex.length < 10) {
@@ -73,7 +63,7 @@ export async function sendTransfer({
   const deployJson = Deploy.toJSON(deploy);
   const click = getClickInstance();
 
-  const result = await click.send(deployJson, from, true);
+  const result = await click.send(deployJson, from, false);
 
   if (result?.cancelled) {
     throw new Error("Transaction cancelled by user");
