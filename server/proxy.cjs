@@ -7,25 +7,7 @@ const app = express();
 app.use(cors());
 app.use(express.json({ limit: "5mb" }));
 
-// const REMOTE_RPC = "https://casper-testnet.public.blastapi.io/rpc";
-const REMOTE_RPC = "https://node.testnet.casper.network/rpc";
-
-app.post("/rpc", async (req, res) => {
-  try {
-    const response = await axios.post(REMOTE_RPC, req.body, {
-      headers: { "Content-Type": "application/json" },
-      timeout: 10000,
-    });
-    res.status(response.status).json(response.data);
-  } catch (err) {
-    console.error("Proxy RPC error", err?.toString());
-    if (err.response) {
-      res.status(err.response.status).json(err.response.data);
-    } else {
-      res.status(500).json({ error: "proxy_error", message: String(err) });
-    }
-  }
-});
+// This proxy now only exposes the /ai route. Stellar calls go direct to Horizon.
 
 app.post("/ai", async (req, res) => {
   try {
@@ -51,7 +33,7 @@ app.post("/ai", async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3002;
 app.listen(PORT, () => {
-  console.log(`Casper RPC proxy listening on http://localhost:${PORT}/rpc`);
+  console.log(`AI proxy listening on http://localhost:${PORT}/ai`);
 });

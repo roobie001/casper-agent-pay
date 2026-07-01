@@ -4,26 +4,9 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>casper-agent-pay</title>
-    <script>
-      const clickUIOptions = {
-        uiContainer: "csprclick-ui",
-        rootAppElement: "#root",
-        showTopBar: true,
-      };
-      const clickSDKOptions = {
-        appName: "CasperAgent Pay",
-        appId: "csprclick-template",
-        providers: ["casper-wallet"],
-      };
-    </script>
-    <script
-      defer
-      src="https://cdn.cspr.click/ui/v1.9.0/csprclick-client-1.9.0.js"
-    ></script>
+    <title>stellar-agent-pay</title>
   </head>
   <body>
-    <div id="csprclick-ui"></div>
     <div id="root"></div>
 
     <script type="module" src="/src/main.tsx"></script>

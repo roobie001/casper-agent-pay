@@ -1,5 +1,5 @@
 import type { AgentInstruction, TransactionRecord } from "./types";
-import { getBalance, sendTransfer } from "./casper";
+import { getBalance, sendTransfer } from "./stellar";
 
 const AI_URL = import.meta.env.DEV ? "http://localhost:3001/ai" : "/api/ai";
 
@@ -13,8 +13,8 @@ function parseInstructionMock(input: string): AgentInstruction {
     // Try to extract amount and recipient (basic parsing)
     const amountMatch = input.match(/(\d+(?:\.\d+)?)/);
     const amount = amountMatch ? parseFloat(amountMatch[1]) : 0;
-    // Extract hex key (simple heuristic: 64-char hex string)
-    const keyMatch = input.match(/([0-9a-f]{64})/i);
+    // Extract Stellar public key (starts with G)
+    const keyMatch = input.match(/(G[A-Z0-9]{55,56})/i);
     const recipient = keyMatch ? keyMatch[1] : "";
     return { action: "transfer", amount, recipient, rawInput: input };
   }
@@ -22,7 +22,7 @@ function parseInstructionMock(input: string): AgentInstruction {
     // Conditional transfer
     const amountMatch = input.match(/(\d+(?:\.\d+)?)/);
     const amount = amountMatch ? parseFloat(amountMatch[1]) : 0;
-    const keyMatch = input.match(/([0-9a-f]{64})/i);
+    const keyMatch = input.match(/(G[A-Z0-9]{55,56})/i);
     const recipient = keyMatch ? keyMatch[1] : "";
     // Extract condition if present
     const conditionMatch = input.match(/balance\s*(>=|<=|==|!=|>|<)\s*(\d+)/i);
@@ -52,15 +52,9 @@ export async function parseInstruction(
         messages: [
           {
             role: "system",
-            content: `You are a payment agent for the Casper blockchain. Parse the user's natural language instruction and return ONLY a JSON object with this exact shape:
-{
-  "action": "transfer" | "check_balance" | "conditional_transfer",
-  "amount": number (in CSPR, optional),
-  "recipient": string (Casper public key hex, optional),
-  "condition": string (e.g. "balance > 100", optional),
-  "rawInput": string (original user input)
-}
-Return only valid JSON. No explanation. No markdown.`,
+            content: `You are a payment agent for the Stellar blockchain. Parse the user's natural language instruction and return ONLY a JSON object:
+{ action: 'transfer'|'check_balance'|'conditional_transfer', amount?: number, recipient?: string, condition?: string, rawInput: string }
+Amounts are in XLM. Return only valid JSON. No explanation. No markdown.`,
           },
           { role: "user", content: input },
         ],
@@ -113,12 +107,13 @@ function evaluateCondition(condition: string, balance: number): boolean {
 export async function executeInstruction(
   instruction: AgentInstruction,
   publicKey: string,
+  secretKey?: string,
 ): Promise<TransactionRecord> {
   const id = Date.now().toString();
   const timestamp = new Date().toISOString();
   const rawInstruction = instruction.rawInput;
 
-  // Helper to parse balance string (e.g., "5,000 CSPR") to number
+  // Helper to parse balance string (e.g., "5,000 XLM") to number
   const getNumericBalance = async (pubKey: string): Promise<number> => {
     const balanceStr = await getBalance(pubKey);
     return parseFloat(balanceStr.replace(/[^0-9.]/g, ""));
@@ -140,6 +135,7 @@ export async function executeInstruction(
       from: publicKey,
       to: instruction.recipient ?? "",
       amount: instruction.amount ?? 0,
+      secretKey: secretKey ?? "",
     });
 
     return {
@@ -171,7 +167,7 @@ export async function executeInstruction(
         timestamp,
         instruction: rawInstruction,
         status: "rejected",
-        decision: `Condition not met: '${instruction.condition}' with balance ${balance} CSPR`,
+        decision: `Condition not met: '${instruction.condition}' with balance ${balance} XLM`,
       };
     }
 
@@ -179,6 +175,7 @@ export async function executeInstruction(
       from: publicKey,
       to: instruction.recipient ?? "",
       amount: instruction.amount ?? 0,
+      secretKey: secretKey ?? "",
     });
 
     return {

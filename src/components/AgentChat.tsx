@@ -9,9 +9,9 @@ export const AgentChat: React.FC<Props> = ({ isProcessing, onSubmit }) => {
   const [input, setInput] = useState("");
 
   const prompts = [
-    "check my balance",
-    "transfer 50 CSPR to...",
-    "pay only if balance > 100",
+    "check my XLM balance",
+    "send 10 XLM to G...",
+    "pay only if balance > 100 XLM",
   ];
 
   function handleSubmit(e: React.FormEvent) {
@@ -55,8 +55,8 @@ export const AgentChat: React.FC<Props> = ({ isProcessing, onSubmit }) => {
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="e.g. transfer 10 CSPR to 0202..."
-            className="w-full rounded-lg border border-gray-700 bg-gray-950 px-4 py-3 text-white outline-none focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/20 disabled:opacity-50"
+            placeholder="e.g. send 10 XLM to G..."
+            className="w-full rounded-lg border border-gray-700 bg-gray-950 px-4 py-3 text-white outline-none focus:border-purple-600/50 focus:ring-1 focus:ring-purple-600/20 disabled:opacity-50"
             disabled={isProcessing}
           />
         </div>
@@ -64,7 +64,7 @@ export const AgentChat: React.FC<Props> = ({ isProcessing, onSubmit }) => {
         <button
           type="submit"
           disabled={isProcessing}
-          className="inline-flex items-center justify-center gap-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-8 transition disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex items-center justify-center gap-2 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-8 transition disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isProcessing ? (
             <>

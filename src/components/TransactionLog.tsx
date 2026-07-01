@@ -108,10 +108,10 @@ export const TransactionLog: React.FC<Props> = ({
                     Transaction Hash:
                   </p>
                   <a
-                    href={`https://testnet.cspr.live/deploy/${record.txHash}`}
+                    href={`https://stellar.expert/explorer/testnet/tx/${record.txHash}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-xs text-orange-400 hover:text-orange-300 font-mono hover:underline transition break-all"
+                    className="text-xs text-purple-400 hover:text-purple-300 font-mono hover:underline transition break-all"
                   >
                     {record.txHash}
                   </a>

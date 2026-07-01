@@ -1,23 +1,24 @@
 ﻿import { useEffect, useState } from "react";
 import AgentChat from "./components/AgentChat";
-import WalletConnect from "./components/WalletConnect";
+import WalletPanel from "./components/WalletPanel";
 import TransactionLog from "./components/TransactionLog";
 import { parseInstruction, executeInstruction } from "./lib/agent";
 import type { TransactionRecord } from "./lib/types";
 
 function App() {
   const [publicKey, setPublicKey] = useState("");
+  const [secretKey, setSecretKey] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
 
   // 1. Initialize from localStorage
   const [transactions, setTransactions] = useState<TransactionRecord[]>(() => {
-    const saved = localStorage.getItem("casper_transactions");
+    const saved = localStorage.getItem("stellar_transactions");
     return saved ? JSON.parse(saved) : [];
   });
 
   // 2. Sync to localStorage on every change
   useEffect(() => {
-    localStorage.setItem("casper_transactions", JSON.stringify(transactions));
+    localStorage.setItem("stellar_transactions", JSON.stringify(transactions));
   }, [transactions]);
 
   // Inside handleAgentSubmit in App.tsx
@@ -25,7 +26,11 @@ function App() {
     setIsProcessing(true);
     try {
       const instruction = await parseInstruction(input);
-      const result = await executeInstruction(instruction, publicKey);
+      const result = await executeInstruction(
+        instruction,
+        publicKey,
+        secretKey,
+      );
       // Add accountKey here
       setTransactions((prev) => [
         { ...result, accountKey: publicKey },
@@ -53,19 +58,19 @@ function App() {
           <p className="text-sm uppercase tracking-[0.32em] text-gray-500 mb-2">
             Payment Agent
           </p>
-          <h1 className="text-5xl sm:text-6xl font-bold bg-gradient-to-r from-white via-gray-300 to-orange-600 bg-clip-text text-transparent mb-2">
-            CasperAgent Pay
+          <h1 className="text-5xl sm:text-6xl font-bold bg-gradient-to-r from-white via-gray-300 to-purple-600 bg-clip-text text-transparent mb-2">
+            StellarAgent Pay
           </h1>
           <p className="mt-3 max-w-3xl text-lg text-gray-400">
-            Autonomous AI payment agent on Casper Network
+            Autonomous AI payment agent on Stellar Network
           </p>
         </header>
 
         <div className="space-y-3 mb-8">
-          {!publicKey && (
-            <div className="rounded-xl bg-orange-500/10 border border-orange-500/30 text-orange-300 p-4 font-medium text-sm flex items-start gap-2">
+          {!(publicKey && secretKey) && (
+            <div className="rounded-xl bg-purple-600/8 border border-purple-600/20 text-purple-300 p-4 font-medium text-sm flex items-start gap-2">
               <span className="text-lg">🔑</span>
-              <span>Connect your wallet to get started</span>
+              <span>Provide your Stellar testnet keys to get started</span>
             </div>
           )}
         </div>
@@ -73,9 +78,11 @@ function App() {
         <div className="flex flex-1 flex-col gap-8 lg:flex-row">
           <div className="w-full lg:w-1/3">
             <div className="rounded-xl border border-gray-800 bg-gray-900/50 p-6 backdrop-blur-sm">
-              <WalletConnect
+              <WalletPanel
                 publicKey={publicKey}
                 setPublicKey={setPublicKey}
+                secretKey={secretKey}
+                setSecretKey={setSecretKey}
               />
             </div>
           </div>

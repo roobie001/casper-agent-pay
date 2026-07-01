@@ -1,5 +1,5 @@
 {
-  "name": "casper-agent-pay",
+  "name": "stellar-agent-pay",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -11,10 +11,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@make-software/csprclick-core-client": "^1.11.0",
-    "@make-software/csprclick-core-types": "^2.1.0",
+    "@stellar/stellar-sdk": "^11.0.0",
     "axios": "^1.4.0",
-    "casper-js-sdk": "latest",
     "concurrently": "^8.0.1",
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
