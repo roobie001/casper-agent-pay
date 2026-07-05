@@ -13,7 +13,8 @@
       };
       const clickSDKOptions = {
         appName: "CasperAgent Pay",
-        appId: "csprclick-template",
+        // Vite will automatically inject the variable here during build, falling back to the template locally
+        appId: "%VITE_CSPR_CLICK_APP_ID%" || "csprclick-template",
         providers: ["casper-wallet"],
       };
     </script>
