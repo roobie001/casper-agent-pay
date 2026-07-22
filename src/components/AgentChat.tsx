@@ -26,54 +26,36 @@ export const AgentChat: React.FC<Props> = ({ isProcessing, onSubmit }) => {
   }
 
   return (
-    <div className="space-y-6 text-white">
-      <div>
-        <h2 className="text-xl font-semibold text-white mb-1">Agent Chat</h2>
-        <p className="text-sm text-gray-400">
-          Submit a natural language instruction and let the AI agent decide what
-          to do.
-        </p>
-      </div>
+    <div className="text-white">
+      <p className="mb-3 text-xs text-white/45">What do you want to do?</p>
 
-      <div className="flex flex-wrap gap-2 mb-4">
+      <div className="mb-3 flex flex-wrap gap-1.5">
         {prompts.map((prompt) => (
           <button
             key={prompt}
             onClick={() => handlePromptClick(prompt)}
-            className="px-3 py-2 rounded-full bg-gray-700 border border-gray-600 text-gray-200 hover:bg-gray-600 text-xs font-medium transition cursor-pointer"
+            className="rounded-full border border-red-600/30 bg-red-600/15 px-3 py-1 text-xs font-medium text-red-200 transition hover:bg-red-600/25"
           >
             {prompt}
           </button>
         ))}
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-400 mb-2">
-            Instruction
-          </label>
-          <input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="e.g. transfer 10 CSPR to 0202..."
-            className="w-full rounded-lg border border-gray-700 bg-gray-950 px-4 py-3 text-white outline-none focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/20 disabled:opacity-50"
-            disabled={isProcessing}
-          />
-        </div>
+      <form onSubmit={handleSubmit} className="flex flex-col gap-2 sm:flex-row">
+        <input
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="e.g. transfer 10 CSPR to 0202..."
+          className="min-w-0 flex-1 rounded-lg border border-white/10 bg-white/5 px-3.5 py-2.5 text-[13px] text-white outline-none transition placeholder:text-white/25 focus:border-red-400/40 focus:ring-1 focus:ring-red-400/15 disabled:opacity-50"
+          disabled={isProcessing}
+        />
 
         <button
           type="submit"
           disabled={isProcessing}
-          className="inline-flex items-center justify-center gap-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-8 transition disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-red-600 to-red-700 px-5 py-2.5 text-[13px] font-medium text-white transition hover:from-red-500 hover:to-red-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {isProcessing ? (
-            <>
-              <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-              Processing...
-            </>
-          ) : (
-            "Submit"
-          )}
+          {isProcessing ? "⟳ Processing..." : "✦ Execute"}
         </button>
       </form>
     </div>

@@ -6,12 +6,14 @@ type Props = {
   currentAccount: string;
 };
 
-function getActionIcon(instruction: string): string {
+function getActionLabel(instruction: string): string {
   const lower = instruction.toLowerCase();
-  if (lower.includes("transfer") || lower.includes("send")) return "💰";
-  if (lower.includes("check") || lower.includes("balance")) return "🔍";
-  if (lower.includes("if") && lower.includes("balance")) return "⚡";
-  return "📋";
+  if (lower.includes("if") && lower.includes("balance")) {
+    return "Conditional transfer";
+  }
+  if (lower.includes("transfer") || lower.includes("send")) return "Transfer";
+  if (lower.includes("check") || lower.includes("balance")) return "Balance check";
+  return "Agent action";
 }
 
 function formatTimestamp(isoString: string): string {
@@ -28,95 +30,89 @@ function formatTimestamp(isoString: string): string {
   return date.toLocaleDateString();
 }
 
+function truncateHash(value: string, end = 4): string {
+  if (!value || value.length <= 12) return value;
+  return `${value.slice(0, 6)}...${value.slice(-end)}`;
+}
+
+function formatInstruction(instruction: string): string {
+  return instruction.replace(/\b[0-9a-fA-F]{64,68}\b/g, (key) =>
+    truncateHash(key),
+  );
+}
+
 export const TransactionLog: React.FC<Props> = ({
   transactions,
   currentAccount,
 }) => {
-  // Filter transactions safely based on the currently connected account
   const filteredTransactions = transactions.filter((tx) => {
-    // Fallback: If a record doesn't have an accountKey yet (old logs),
-    // let it show up so your history doesn't abruptly disappear.
     if (!tx.accountKey) return true;
 
     return tx.accountKey === currentAccount;
   });
 
   return (
-    <div className="space-y-4 text-white">
-      <div>
-        <h3 className="text-xl font-semibold text-white mb-1">
-          Transaction Log
-        </h3>
-        <p className="text-sm text-gray-400">
-          Recent agent actions and decisions.
-        </p>
+    <div className="flex min-h-0 flex-1 flex-col text-white">
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <h3 className="text-sm font-medium text-white">Transaction log</h3>
+        <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[11px] text-white/45">
+          {filteredTransactions.length}
+        </span>
       </div>
 
-      {/* FIXED HEIGHT CONTAINER WITH SCROLLBAR */}
-      <div className="h-[400px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900 space-y-3">
+      <div className="min-h-[360px] flex-1 space-y-2 overflow-y-auto pr-1">
         {filteredTransactions.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-gray-700 bg-gray-900/30 p-8 text-center">
-            <div className="text-3xl mb-2">📭</div>
-            <p className="text-sm text-gray-400 font-medium">
+          <div className="flex min-h-[300px] flex-col items-center justify-center rounded-lg border border-dashed border-white/10 bg-white/[0.02] text-center">
+            <div className="mb-3 h-9 w-9 rounded-full border border-red-400/25 bg-red-500/10" />
+            <p className="text-sm font-medium text-white/45">
               No transactions yet
-            </p>
-            <p className="text-xs text-gray-500 mt-1">
-              Submit an instruction to get started
             </p>
           </div>
         ) : (
           filteredTransactions.map((record) => (
             <div
               key={record.id}
-              className="rounded-lg border border-gray-800 bg-gray-900/40 p-4 hover:bg-gray-900/60 transition"
+              className="rounded-[10px] border border-white/[0.07] bg-white/[0.03] px-3.5 py-2.5 transition hover:bg-white/[0.045]"
             >
               <div className="flex items-start justify-between gap-3">
-                <div className="flex items-start gap-3 flex-1">
-                  <span className="text-xl mt-0.5 flex-shrink-0">
-                    {getActionIcon(record.instruction)}
-                  </span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm text-gray-400 font-medium">
-                      {formatTimestamp(record.timestamp)}
-                    </p>
-                    <p className="text-sm text-white mt-1 break-words">
-                      {record.instruction}
-                    </p>
-                  </div>
+                <div className="min-w-0 flex-1">
+                  <p className="mb-1 text-[11px] text-white/35">
+                    {getActionLabel(record.instruction)}
+                  </p>
+                  <p className="truncate text-xs text-white">
+                    {formatInstruction(record.instruction)}
+                  </p>
                 </div>
                 <span
-                  className={`px-3 py-1 rounded-full text-xs font-semibold flex-shrink-0 whitespace-nowrap ${
+                  className={`shrink-0 rounded-full border px-2 py-0.5 text-[11px] font-medium ${
                     record.status === "executed"
-                      ? "bg-green-500/20 text-green-300 border border-green-500/30"
-                      : "bg-red-500/20 text-red-300 border border-red-500/30"
+                      ? "border-emerald-500/30 bg-emerald-500/15 text-emerald-400"
+                      : "border-red-500/30 bg-red-500/15 text-red-400"
                   }`}
                 >
-                  {record.status === "executed" ? "✓ Executed" : "✕ Rejected"}
+                  {record.status === "executed" ? "Executed" : "Rejected"}
                 </span>
               </div>
 
               {record.decision && (
-                <div className="mt-3 rounded-lg bg-gray-950/50 px-3 py-2 text-xs text-gray-300 border border-gray-800">
-                  <span className="text-gray-500 font-medium">Decision: </span>
+                <div className="mt-2 text-xs font-medium text-red-300">
                   {record.decision}
                 </div>
               )}
 
-              {record.txHash && (
-                <div className="mt-3">
-                  <p className="text-xs text-gray-500 mb-1">
-                    Transaction Hash:
-                  </p>
+              <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-[11px] text-white/35">
+                <span>{formatTimestamp(record.timestamp)}</span>
+                {record.txHash && (
                   <a
                     href={`https://testnet.cspr.live/deploy/${record.txHash}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-xs text-orange-400 hover:text-orange-300 font-mono hover:underline transition break-all"
+                    className="font-mono text-red-300 transition hover:text-red-200 hover:underline"
                   >
-                    {record.txHash}
+                    {truncateHash(record.txHash)}
                   </a>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           ))
         )}

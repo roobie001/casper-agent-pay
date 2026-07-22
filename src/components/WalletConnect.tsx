@@ -40,29 +40,25 @@ export const WalletConnect: React.FC<Props> = ({ publicKey, setPublicKey }) => {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-2 mb-4">
-        <div
-          className={`h-2 w-2 rounded-full ${connected ? "bg-green-500" : "bg-red-500"}`}
-        />
-        <h3 className="text-lg font-semibold text-white">Wallet</h3>
-      </div>
-
-      <div className="space-y-3">
-        <button
-          onClick={handleConnect}
-          className="w-full rounded-lg bg-green-600/20 border border-green-600/30 hover:bg-green-600/30 px-4 py-2 text-sm font-medium text-green-400 transition"
-        >
-          {connected ? "✓ Connected" : "Connect Casper Wallet"}
-        </button>
-      </div>
+    <div className="space-y-3">
+      <button
+        onClick={handleConnect}
+        disabled={connected}
+        className={`w-full rounded-lg border px-3 py-2.5 text-sm font-medium transition ${
+          connected
+            ? "cursor-default border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+            : "border-red-600/30 bg-red-600/15 text-red-300 hover:bg-red-600/25"
+        }`}
+      >
+        {connected ? "✓ Connected" : "Connect Casper Wallet"}
+      </button>
 
       {connected && (
-        <div className="rounded-lg bg-green-500/5 border border-green-500/20 p-3">
-          <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
-            Connected Address
+        <div className="rounded-lg border border-red-600/20 bg-red-600/[0.08] px-2.5 py-2">
+          <p className="mb-1 text-[10px] uppercase text-white/30">
+            Connected
           </p>
-          <p className="font-mono text-sm text-green-400 break-all">
+          <p className="break-all font-mono text-[11px] text-red-300">
             {truncateKey(publicKey)}
           </p>
         </div>
