@@ -54,6 +54,16 @@ export const WalletConnect: React.FC<Props> = ({ publicKey, setPublicKey }) => {
       </button>
 
       {connected && (
+        <button
+          type="button"
+          onClick={() => setPublicKey("")}
+          className="cursor-pointer border-0 bg-transparent p-0 text-[11px] text-red-500/70 transition hover:text-red-400"
+        >
+          Disconnect
+        </button>
+      )}
+
+      {connected && (
         <div className="rounded-lg border border-red-600/20 bg-red-600/[0.08] px-2.5 py-2">
           <p className="mb-1 text-[10px] uppercase text-white/30">
             Connected

@@ -83,7 +83,7 @@ function App() {
       <div className="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(rgba(220,38,38,0.1)_1px,transparent_1px)] bg-[length:28px_28px]" />
 
       <div className="flex min-h-screen flex-col lg:flex-row">
-        <aside className="flex w-full flex-col gap-3 border-b border-white/[0.08] p-4 lg:w-[220px] lg:border-b-0 lg:border-r">
+        <aside className="flex w-full flex-col gap-3 border-b border-white/[0.08] p-4 pb-4 lg:w-[220px] lg:border-b-0 lg:border-r">
           <div>
             <p className="mb-1 text-[11px] uppercase tracking-[0.08em] text-white/30">
               Wallet
@@ -103,14 +103,14 @@ function App() {
                   className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[11px] text-white/45 transition hover:text-white"
                   aria-label={showBalance ? "Hide balance" : "Show balance"}
                 >
-                  {showBalance ? "Hide" : "View"}
+                  {showBalance ? "🙈" : "👁"}
                 </button>
               </div>
 
               {balanceError ? (
                 <p className="text-[11px] text-white/45">{balanceError}</p>
               ) : showBalance ? (
-                <p className="text-xl font-medium text-red-300">
+                <p className="text-xl font-medium text-red-400">
                   {balance || "Loading"}
                   {balance && (
                     <span className="ml-1 text-xs font-normal text-white/35">
@@ -119,12 +119,14 @@ function App() {
                   )}
                 </p>
               ) : (
-                <p className="text-lg font-medium text-red-300">••••••</p>
+                <span className="text-base tracking-[3px] text-white/30">
+                  ••••••
+                </span>
               )}
             </div>
           )}
 
-          <div className="mt-auto pt-4">
+          <div className="mt-auto pt-4" style={{ marginTop: "auto" }}>
             <p className="mb-1 text-[11px] uppercase tracking-[0.08em] text-white/30">
               Network
             </p>
@@ -181,7 +183,7 @@ function App() {
             />
           </div>
 
-          <div className="flex min-h-0 flex-1 px-5 py-4">
+          <div className="mt-1 flex min-h-0 flex-1 border-t border-white/[0.08] px-5 pb-4 pt-4">
             <TransactionLog
               transactions={transactions}
               currentAccount={publicKey}

@@ -60,7 +60,10 @@ export const TransactionLog: React.FC<Props> = ({
         </span>
       </div>
 
-      <div className="min-h-[360px] flex-1 space-y-2 overflow-y-auto pr-1">
+      <div
+        className="min-h-[360px] flex-1 overflow-y-auto pr-1"
+        style={{ maxHeight: "calc(100vh - 300px)" }}
+      >
         {filteredTransactions.length === 0 ? (
           <div className="flex min-h-[300px] flex-col items-center justify-center rounded-lg border border-dashed border-white/10 bg-white/[0.02] text-center">
             <div className="mb-3 h-9 w-9 rounded-full border border-red-400/25 bg-red-500/10" />
@@ -72,7 +75,14 @@ export const TransactionLog: React.FC<Props> = ({
           filteredTransactions.map((record) => (
             <div
               key={record.id}
-              className="rounded-[10px] border border-white/[0.07] bg-white/[0.03] px-3.5 py-2.5 transition hover:bg-white/[0.045]"
+              className="transition hover:bg-white/[0.045]"
+              style={{
+                border: "0.5px solid rgba(255,255,255,0.07)",
+                borderRadius: "10px",
+                marginBottom: "8px",
+                padding: "12px 14px",
+                background: "rgba(255,255,255,0.02)",
+              }}
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0 flex-1">
